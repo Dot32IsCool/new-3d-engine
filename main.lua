@@ -15,14 +15,16 @@ mesh:setTexture(love.graphics.newImage("dot.png"))
 local canvas = love.graphics.newCanvas()
 
 local view = cpml.mat4.identity()
-view = view:translate(view, cpml.vec3.new(0, 0, -10))
+view = view:translate(view, cpml.vec3.new(0, 0, -8))
 view = view:rotate(view, math.rad(26.57), cpml.vec3.new(1,0,0))
 
 local player = {xV=0, zV=0}
 player.mat = cpml.mat4.identity()
+player.mat:translate(player.mat, cpml.vec3.new(0,0.5,0))
 
 local somethingElse = cpml.mat4.identity()
 somethingElse:translate(somethingElse, cpml.vec3.new(4,0,0))
+somethingElse:translate(somethingElse, cpml.vec3.new(0,0.5,0))
 
 local elseTable = {}
 for i=1, 60 do
@@ -30,12 +32,48 @@ for i=1, 60 do
 	object:rotate(object, math.rad(math.random()*360), cpml.vec3.new(0,1,0))
 	object:translate(object, cpml.vec3.new(math.random()*10-5, 0,math.random()*10-5))
 	object:scale(object, cpml.vec3.new(0.5,0.5,0.5))
+	object:translate(object, cpml.vec3.new(0,0.5,0))
 	table.insert(elseTable, object)
 end
 
-local size = 8
-local aspect = love.graphics.getWidth() / love.graphics.getHeight()
-local projection = cpml.mat4.from_ortho(-size, size, -size/aspect, size/aspect, 0.1, 1000)
+
+local size
+local aspect
+local projection
+
+local function createProjection() 
+	-- projection = cpml.mat4.from_perspective(90, love.graphics.getWidth() / love.graphics.getHeight(), 0.1, 1000)
+	size = 8
+	aspect = love.graphics.getWidth() / love.graphics.getHeight()
+	projection = cpml.mat4.from_ortho(-size, size, -size/aspect, size/aspect, 0.1, 1000)
+end
+
+createProjection() 
+
+local function CreateCircle(segments, size)
+	local vertices = {}
+
+	-- The first vertex is at the origin (0, 0) and will be the center of the circle.
+	table.insert(vertices, {0, 0, 0, 0.5, 0.5, 142/255,183/255,130/255})
+
+	-- Create the vertices at the edge of the circle.
+	for i=0, segments do
+		local angle = (i / segments) * math.pi * 2
+
+		-- Unit-circle.
+		local x = math.cos(angle)
+		local z = math.sin(angle)
+
+		table.insert(vertices, {x*size, 0, z*size, (x+1)/2, (z+1)/2, 142/255,183/255,130/255})
+	end
+	-- The "fan" draw mode is perfect for our circle.
+	return love.graphics.newMesh(format, vertices, "fan", "static")
+end
+
+local floor = {}
+floor.mesh = CreateCircle(40, 1)
+floor.mat = cpml.mat4.identity()
+floor.mat:scale(floor.mat, cpml.vec3.new(8, 8, 8))
 
 function love.update(dt)
 	view = view:rotate(view, math.rad(10)*dt, cpml.vec3.new(0,1,0))
@@ -81,6 +119,9 @@ function love.draw()
 		love.graphics.draw(mesh)
 	end
 
+	shader:send("model", "column", floor.mat)
+	love.graphics.draw(floor.mesh)
+
 	love.graphics.setShader()
 	love.graphics.setCanvas()
 
@@ -89,8 +130,7 @@ function love.draw()
 end
 
 function love.resize(w, h)
-	aspect = love.graphics.getWidth() / love.graphics.getHeight()
-	projection = cpml.mat4.from_ortho(-size, size, -size/aspect, size/aspect, 0.1, 1000)
+	createProjection() 
 	canvas = love.graphics.newCanvas()
 end
 
