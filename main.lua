@@ -15,7 +15,7 @@ mesh:setTexture(love.graphics.newImage("dot.png"))
 local canvas = love.graphics.newCanvas()
 
 local view = cpml.mat4.identity()
-view = view:translate(view, cpml.vec3.new(0, 0, -8))
+view = view:translate(view, cpml.vec3.new(0, 0, -10))
 view = view:rotate(view, math.rad(26.57), cpml.vec3.new(1,0,0))
 
 local player = {xV=0, zV=0}
@@ -37,26 +37,40 @@ for i=1, 60 do
 end
 
 local perspective = false
-local function togglePerspective()
-	perspective = not perspective
-	player.mat:scale(player.mat, cpml.vec3.new(0,-1,0))
-	somethingElse:scale(somethingElse, cpml.vec3.new(0,-1,0))
-	for i, cube in ipairs(elseTable) do
-		cube:scale(cube, cpml.vec3.new(0,-1,0))
-	end
-end
-
 local size
 local aspect
 local projection
 local function createProjection() 
-	-- projection = cpml.mat4.from_perspective(90, love.graphics.getWidth() / love.graphics.getHeight(), 0.1, 1000)
-	size = 8
-	aspect = love.graphics.getWidth() / love.graphics.getHeight()
-	projection = cpml.mat4.from_ortho(-size, size, -size/aspect, size/aspect, 0.1, 1000)
+	if not perspective then
+		size = 8
+		aspect = love.graphics.getWidth() / love.graphics.getHeight()
+		projection = cpml.mat4.from_ortho(-size, size, -size/aspect, size/aspect, 0.1, 1000)
+	else
+		projection = cpml.mat4.from_perspective(70, love.graphics.getWidth() / love.graphics.getHeight(), 0.1, 1000)
+	end
 end
 
 createProjection() 
+
+local function togglePerspective()
+	perspective = not perspective
+	player.mat:scale(player.mat, cpml.vec3.new(1,-1,1))
+	player.mat:translate(player.mat, cpml.vec3.new(0,1,0))
+	somethingElse:scale(somethingElse, cpml.vec3.new(1,-1,1))
+	somethingElse:translate(somethingElse, cpml.vec3.new(0,1,0))
+	for i, cube in ipairs(elseTable) do
+		cube:scale(cube, cpml.vec3.new(1,-1,1))
+		cube:translate(cube, cpml.vec3.new(0,1,0))
+	end
+	createProjection()
+	view = cpml.mat4.identity()
+	view = view:translate(view, cpml.vec3.new(0, 0, -8))
+	if not perspective then
+		view = view:rotate(view, math.rad(26.57), cpml.vec3.new(1,0,0))
+	else
+		view = view:rotate(view, math.rad(-26.57), cpml.vec3.new(1,0,0))
+	end
+end
 
 local function CreateCircle(segments, size)
 	local vertices = {}
@@ -147,10 +161,18 @@ function love.keypressed(k)
 		elseTable = {}
 		for i=1, 60 do
 			local object = cpml.mat4.identity()
+			object:rotate(object, math.rad(math.random()*360), cpml.vec3.new(0,1,0))
 			object:translate(object, cpml.vec3.new(math.random()*10-5, 0,math.random()*10-5))
 			object:scale(object, cpml.vec3.new(0.5,0.5,0.5))
-			object:rotate(object, math.rad(math.random()*90), cpml.vec3.new(0,1,0))
+			object:translate(object, cpml.vec3.new(0,0.5,0))
+			if perspective then
+				objectr:scale(objectr, cpml.vec3.new(1,-1,1))
+				objectr:translate(objectr, cpml.vec3.new(0,1,0))
+			end
 			table.insert(elseTable, object)
 		end
+	end
+	if k == "space" then
+		togglePerspective()
 	end
 end
