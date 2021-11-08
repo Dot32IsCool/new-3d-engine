@@ -46,7 +46,7 @@ local function createProjection()
 		aspect = love.graphics.getWidth() / love.graphics.getHeight()
 		projection = cpml.mat4.from_ortho(-size, size, -size/aspect, size/aspect, 0.1, 1000)
 	else
-		projection = cpml.mat4.from_perspective(70, love.graphics.getWidth() / love.graphics.getHeight(), 0.1, 1000)
+		projection = cpml.mat4.from_perspective(50, love.graphics.getWidth() / love.graphics.getHeight(), 0.1, 1000)
 	end
 end
 
@@ -147,7 +147,11 @@ function love.draw()
 	love.graphics.setShader()
 	love.graphics.setCanvas()
 
+
+	love.graphics.print(math.floor(love.timer.getFPS()))
+	
 	love.graphics.draw(canvas)
+
 	intro:draw()
 end
 
