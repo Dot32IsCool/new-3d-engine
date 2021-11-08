@@ -3,7 +3,7 @@ local cpml = require("vendor.cpml")
 local intro = require("intro")
 intro:init()
 
-local shader = love.graphics.newShader(love.filesystem.read("vs.glsl"), love.filesystem.read("fs.glsl"))
+local shader = love.graphics.newShader(love.filesystem.read("main.vs"), love.filesystem.read("main.fs"))
 local vertices = require("vertices")
 local format = {
 	{"VertexPosition", "float", 3},
@@ -36,11 +36,19 @@ for i=1, 60 do
 	table.insert(elseTable, object)
 end
 
+local perspective = false
+local function togglePerspective()
+	perspective = not perspective
+	player.mat:scale(player.mat, cpml.vec3.new(0,-1,0))
+	somethingElse:scale(somethingElse, cpml.vec3.new(0,-1,0))
+	for i, cube in ipairs(elseTable) do
+		cube:scale(cube, cpml.vec3.new(0,-1,0))
+	end
+end
 
 local size
 local aspect
 local projection
-
 local function createProjection() 
 	-- projection = cpml.mat4.from_perspective(90, love.graphics.getWidth() / love.graphics.getHeight(), 0.1, 1000)
 	size = 8
