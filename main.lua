@@ -79,7 +79,7 @@ local function CreateCircle(segments, size)
 end
 
 local floor = {}
-floor.mesh = CreateCircle(40, 1)
+floor.mesh = CreateCircle(60, 1)
 floor.mat = cpml.mat4.identity()
 floor.mat:scale(floor.mat, cpml.vec3.new(8, 8, 8))
 
