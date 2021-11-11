@@ -72,11 +72,11 @@ local function togglePerspective()
 	end
 end
 
-local function CreateCircle(segments, size)
+local function CreateCircle(segments, size, verticle, r, g, b)
 	local vertices = {}
 
 	-- The first vertex is at the origin (0, 0) and will be the center of the circle.
-	table.insert(vertices, {0, 0, 0, 0.5, 0.5, 142/255,183/255,130/255})
+	table.insert(vertices, {0, 0, 0, 0.5, 0.5, r or 142/255, g or 183/255, b or 130/255})
 
 	-- Create the vertices at the edge of the circle.
 	for i=0, segments do
@@ -86,7 +86,11 @@ local function CreateCircle(segments, size)
 		local x = math.cos(angle)
 		local z = math.sin(angle)
 
-		table.insert(vertices, {x*size, 0, z*size, (x+1)/2, (z+1)/2, 142/255,183/255,130/255})
+		if verticle then
+			table.insert(vertices, {x*size, z*size, 0, (x+1)/2, (z+1)/2, r or 142/255, g or 183/255, b or 130/255})
+		else
+			table.insert(vertices, {x*size, 0, z*size, (x+1)/2, (z+1)/2, r or 142/255, g or 183/255, b or 130/255})
+		end
 	end
 	-- The "fan" draw mode is perfect for our circle.
 	return love.graphics.newMesh(format, vertices, "fan", "static")
@@ -124,7 +128,7 @@ end
 function love.draw()
 	love.graphics.setCanvas({canvas, depth=true})
 	love.graphics.setShader(shader)
-	love.graphics.setDepthMode("less", true)
+	love.graphics.setDepthMode("lequal", true)
 	love.graphics.clear()	
 
 	shader:send("view", "column", view)
